@@ -1,14 +1,3 @@
-const congaLineArr = [
-    'name1',
-    'name2',
-    'name3',
-    'name4',
-    'name5',
-    'name6',
-    'name7',
-    'name8',
-];
-
 const waveCannonL = [
     'name1',
     'name2',
@@ -71,6 +60,11 @@ Options.Triggers.push(
             mySpotlightStacks: [],
             myLatentDefectTowerRound: 0,
             myWaveCannonStacks: [],
+            myOptFirePositions: { },
+            myDistancesToEye: [],
+            cw90FromEye: { },
+            rightGroup: { },
+            leftGroup: { },
         };
     },
     triggers: [
@@ -164,38 +158,39 @@ Options.Triggers.push(
         },
     },
     {
-        id: 'MY TOP Synergy Marker',
-        type: 'GainsEffect',
-        netRegex: { effectId: ['D63', 'D64'], capture: false },
-        delaySeconds: 0.5,
-        suppressSeconds: 10,
-        run: (data, matches, output) => {
-            var congaLine = congaLineArr.slice();
-            var leftGroup = {};
-            var rightGroup = {};
+        id: 'MY TOP Optical Laser',
+        type: 'StartsUsing',
+        netRegex: { id: '7B21', source: 'Optical Unit' },
+        run: ( data, matches ) => {
+            data.cw90FromEye = { x: (200-matches.y), y: matches.x };
+        },
+    },
+    {
+        id: 'MY TOP Optimized Fire III',
+        type: 'Ability',
+        netRegex: { id: '7B2F' },
+        run: ( data, matches ) => {
+            data.myOptFirePositions[matches.target] = { x: matches.targetX,
+                                                        y: matches.targetY };
 
-            for ( let i = 0; i < congaLine.length; i++ )
+            if ( Object.keys(data.myOptFirePositions).length !== 8 )
+                return;
+
+            for ( const name in data.myOptFirePositions )
             {
-                if ( congaLine[i] !== undefined )
-                {
-                    var markL = data.synergyMarker[congaLine[i]];
-                    leftGroup[markL] = congaLine[i];
-                    for ( const [name, marker] of Object.entries( data.synergyMarker ) )
-                    {
-                        if (   ( marker === markL )
-                            && ( name !== congaLine[i] ) )
-                        {
-                            rightGroup[markL] = name;
-                            var idx = congaLine.indexOf( name );
-                            congaLine[idx] = undefined;
-                            break;
-                        }
-                    }
-                    congaLine[i] = undefined;
-                }
+                data.myDistancesToEye.push( { name: name,
+                                              distance: Math.sqrt(  Math.pow((data.cw90FromEye.x - data.myOptFirePositions[name].x), 2)
+                                                                  + Math.pow((data.cw90FromEye.y - data.myOptFirePositions[name].y), 2) ) } );
             }
-            data.leftGroup = leftGroup;
-            data.rightGroup = rightGroup;
+            data.myDistancesToEye.sort((a, b) => (a.distance - b.distance));
+
+            data.myDistancesToEye.slice( 0, 4 ).forEach( p => {
+                data.rightGroup[data.synergyMarker[p.name]] = p.name;
+            } );
+
+            data.myDistancesToEye.slice( 4, 8 ).forEach( p => {
+                data.leftGroup[data.synergyMarker[p.name]] = p.name;
+            } );
         },
     },
     {
