@@ -12,20 +12,15 @@ const waveCannonR = [
     'name8'
 ];
 
-const hwFarJumpTargets = [
-    'name1',
-    'name2',
-    'name3',
-    'name4'
-];
-
-const hwArmBaitTargets = [
+const sigmaBaitTargets = [
     'name1',
     'name2',
     'name3',
     'name4',
     'name5',
-    'name6'
+    'name6',
+    'name7',
+    'name8'
 ];
 
 const markOrder = {
@@ -82,7 +77,7 @@ Options.Triggers.push(
             rightGroup: { },
             leftGroup: { },
             dynamisStacks: { },
-            farJumpTargets: [],
+            farWorldTargets: [],
             armBaitTargets: []
         };
     },
@@ -385,17 +380,7 @@ Options.Triggers.push(
             };
 
             var count = 0;
-            hwFarJumpTargets.every( name => {
-                if ( data.trioDebuff[name] === undefined )
-                {
-                    data.farJumpTargets.push( name );
-                    count++;
-                }
-                return (count < 2);
-            } );
-
-            var count = 0;
-            hwArmBaitTargets.every( name => {
+            sigmaBaitTargets.every( name => {
                 if (   ( data.trioDebuff[name] === undefined )
                     && ( data.dynamisStacks[name] >= 1 ) )
                 {
@@ -405,12 +390,22 @@ Options.Triggers.push(
                 return (count < 2);
             } );
 
-            if (   ( data.farJumpTargets.length == 2 )
+            var count = 0;
+            sigmaBaitTargets.slice().reverse().every( name => {
+                if ( data.trioDebuff[name] === undefined )
+                {
+                    data.farWorldTargets.push( name );
+                    count++;
+                }
+                return (count < 2);
+            } );
+
+            if (   ( data.farWorldTargets.length == 2 )
                 && ( data.armBaitTargets.length == 2 ) )
             {
                 return {
-                    infoText: output.response( { p1: data.ShortName( data.farJumpTargets[0] ),
-                                                 p2: data.ShortName( data.farJumpTargets[1] ),
+                    infoText: output.response( { p1: data.ShortName( data.farWorldTargets[0] ),
+                                                 p2: data.ShortName( data.farWorldTargets[1] ),
                                                  p3: data.ShortName( data.armBaitTargets[0] ),
                                                  p4: data.ShortName( data.armBaitTargets[1] ) } )
                 }
