@@ -12,6 +12,22 @@ const waveCannonR = [
     'name8'
 ];
 
+const hwFarJumpTargets = [
+    'name1',
+    'name2',
+    'name3',
+    'name4'
+];
+
+const hwArmBaitTargets = [
+    'name1',
+    'name2',
+    'name3',
+    'name4',
+    'name5',
+    'name6'
+];
+
 const markOrder = {
     "cross": 1,
     "triangle": 2,
@@ -65,6 +81,9 @@ Options.Triggers.push(
             cw90FromEye: { },
             rightGroup: { },
             leftGroup: { },
+            dynamisStacks: { },
+            farJumpTargets: [],
+            armBaitTargets: []
         };
     },
     triggers: [
@@ -75,15 +94,13 @@ Options.Triggers.push(
         delaySeconds: 0.5,
         durationSeconds: 5,
         suppressSeconds: 9999,
-        infoText: (data, _matches, output) => {
-            return output.text();
+        infoText: (_data, _matches, output) => {
+            return output.response();
         },
-        outputStrings:
-        {
-            text: {
+        outputStrings: {
+            response: {
                 en: '3\'s in',
             },
-            unknown: Outputs.unknown,
         },
     },
     {
@@ -91,14 +108,13 @@ Options.Triggers.push(
         type: 'StartsUsing',
         // 7B07 = Blaster cast (only one cast, but 4 abilities)
         netRegex: { id: '7B07', source: 'Omega', capture: false },
-        response: (data, _matches, output) => {
-            output.responseOutputStrings = {
-                str: {
-                    en: '1\'s out',
-                },
-            };
-
-            return { infoText: output.str() };
+        infoText: (_data, _matches, output) => {
+            return output.response();
+        },
+        outputStrings: {
+            response: {
+                en: '1\'s out',
+            },
         },
     },
     {
@@ -106,18 +122,17 @@ Options.Triggers.push(
         type: 'Ability',
         netRegex: { id: '7B08', source: 'Omega', capture: false },
         preRun: (data) => data.myLoopBlasterCount++,
-        response: (data, _matches, output) => {
-            output.responseOutputStrings = {
-                str: {
-                    en: '${num}\'s out',
-                },
-            };
-
+        infoText: (data, _matches, output) => {
             const mechanicNum = data.myLoopBlasterCount + 1;
             if ( mechanicNum >= 5 )
                 return;
 
-            return { infoText: output.str( { num: mechanicNum } ) };
+            return output.response( { num: mechanicNum } );
+        },
+        outputStrings: {
+            response: {
+                en: '${num}\'s out',
+            },
         },
     },
     {
@@ -126,14 +141,13 @@ Options.Triggers.push(
         // 7B0D = initial Flame Thrower cast, 7E70 = later ones
         netRegex: { id: '7B0D', source: 'Omega', capture: false },
         suppressSeconds: 1,
-        response: (data, _matches, output) => {
-            output.responseOutputStrings = {
-                str: {
-                    en: '1\'s out',
-                },
-            };
-
-            return { infoText: output.str() };
+        infoText: (_data, _matches, output) => {
+            return output.response();
+        },
+        outputStrings: {
+            response: {
+                en: '1\'s out',
+            },
         },
     },
     {
@@ -143,33 +157,32 @@ Options.Triggers.push(
         netRegex: { id: '7B0E', source: 'Omega', capture: false },
         preRun: (data) => data.myPantoMissileCount++,
         suppressSeconds: 1,
-        response: (data, _matches, output) => {
-            output.responseOutputStrings = {
-                str: {
-                    en: '${num}\'s out',
-                },
-            };
-
+        infoText: (data, _matches, output) => {
             const mechanicNum = data.myPantoMissileCount + 1;
             if ( mechanicNum >= 5 )
                 return;
 
-            return { infoText: output.str( { num: mechanicNum } ) };
+            return output.response( { num: mechanicNum } );
+        },
+        outputStrings: {
+            response: {
+                en: '${num}\'s out',
+            },
         },
     },
     {
         id: 'MY TOP Optical Laser',
         type: 'StartsUsing',
         netRegex: { id: '7B21', source: 'Optical Unit' },
-        run: ( data, matches ) => {
+        run: (data, matches) => {
             data.cw90FromEye = { x: (200-matches.y), y: matches.x };
         },
     },
     {
-        id: 'MY TOP Optimized Fire III',
+        id: 'MY TOP Optimized Fire III Collector',
         type: 'Ability',
         netRegex: { id: '7B2F' },
-        run: ( data, matches ) => {
+        run: (data, matches) => {
             data.myOptFirePositions[matches.target] = { x: matches.targetX,
                                                         y: matches.targetY };
 
@@ -201,7 +214,7 @@ Options.Triggers.push(
         response: (data, matches, output) => {
             output.responseOutputStrings = {
                 swap: {
-                    en: '${player1} and ${player2} swap',
+                    en: '${p1} and ${p2} swap',
                 },
                 noSwap: {
                     en: "No swap"
@@ -213,7 +226,7 @@ Options.Triggers.push(
             if (   ( data.mySpotlightStacks.length !== 2 )
                 || ( p1 === undefined )
                 || ( p2 === undefined ) )
-            { 
+            {
                 return;
             }
 
@@ -246,8 +259,8 @@ Options.Triggers.push(
                     playerR = data.rightGroup[mark2];
                 }
                 str = output.swap( {
-                        player1: data.ShortName( playerL ),
-                        player2: data.ShortName( playerR ) } );
+                        p1: data.ShortName( playerL ),
+                        p2: data.ShortName( playerR ) } );
             }
             else if (   ( rgarr.includes( p1 ) )
                      && ( rgarr.includes( p2 ) ) )
@@ -267,8 +280,8 @@ Options.Triggers.push(
                     playerR = p2;
                 }
                 str = output.swap( {
-                        player1: data.ShortName( playerL ),
-                        player2: data.ShortName( playerR ) } );
+                        p1: data.ShortName( playerL ),
+                        p2: data.ShortName( playerR ) } );
             }
             return { alertText: str };
         },
@@ -279,10 +292,10 @@ Options.Triggers.push(
         netRegex: { id: '7B6F', source: 'Omega', capture: false },
         preRun: (data) => data.myLatentDefectTowerRound++,
         infoText: (data, _matches, output) => {
-            return output.towerRound( { num: data.myLatentDefectTowerRound } );
+            return output.response( { num: data.myLatentDefectTowerRound } );
         },
         outputStrings: {
-            towerRound: {
+            response: {
                 en: 'Tower Round ${num}',
             },
         },
@@ -302,7 +315,7 @@ Options.Triggers.push(
         response: (data, _matches, output) => {
             output.responseOutputStrings = {
                 swap: {
-                    en: '${player1} and ${player2} swap',
+                    en: '${p1} and ${p2} swap',
                 },
                 noSwap: {
                     en: "No swap",
@@ -328,8 +341,8 @@ Options.Triggers.push(
                                                 waveCannonL.indexOf( p2 ) )];
                 playerR = waveCannonR[0];
                 str = output.swap( {
-                    player1: data.ShortName( playerL ),
-                    player2: data.ShortName( playerR ) } );
+                    p1: data.ShortName( playerL ),
+                    p2: data.ShortName( playerR ) } );
 
             }
             else if (   ( waveCannonR.includes( p1 ) )
@@ -339,13 +352,71 @@ Options.Triggers.push(
                                                 waveCannonR.indexOf( p2 ) )];
                 playerL = waveCannonL[0];;
                 str = output.swap( {
-                    player1: data.ShortName( playerL ),
-                    player2: data.ShortName( playerR ) } );
+                    p1: data.ShortName( playerL ),
+                    p2: data.ShortName( playerR ) } );
 
             }
             return { alertText: str };
         },
         run: (data, _matches) => data.myWaveCannonStacks = [],
+    },
+    {
+        id: 'MY TOP P5 Quickening Dynamis Collector',
+        type: 'GainsEffect',
+        netRegex: { effectId: 'D74' },
+        run: (data, matches) => {
+            if ( data.dynamisStacks[matches.target] === undefined )
+                data.dynamisStacks[matches.target] = 1;
+            else
+                data.dynamisStacks[matches.target]++;
+        },
+    },
+    {
+        id: 'MY TOP P5 Sigma Debuffs',
+        type: 'Ability',
+        netRegex: { id: '7B04', capture: false },
+        condition: (data) => data.phase === 'sigma',
+        suppressSeconds: 5,
+        response: (data, _matches, output) => {
+            output.responseOutputStrings = {
+                response: {
+                    en: '${p1} 1, ${p2} 2, ${p3} ${p4} arms',
+                },
+            };
+
+            var count = 0;
+            hwFarJumpTargets.every( name => {
+                if ( data.trioDebuff[name] === undefined )
+                {
+                    data.farJumpTargets.push( name );
+                    count++;
+                }
+                return (count < 2);
+            } );
+
+            var count = 0;
+            data.armBaitTargets = [];
+            hwArmBaitTargets.every( name => {
+                if (   ( data.trioDebuff[name] === undefined )
+                    && ( data.dynamisStacks[name] >= 1 ) )
+                {
+                    data.armBaitTargets.push( name );
+                    count++;
+                }
+                return (count < 2);
+            } );
+
+            if (   ( data.farJumpTargets.length == 2 )
+                && ( data.armBaitTargets.length == 2 ) )
+            {
+                return {
+                    infoText: response.call( { p1: data.ShortName( data.farJumpTargets[0] ),
+                                               p2: data.ShortName( data.farJumpTargets[1] ),
+                                               p3: data.ShortName( data.armBaitTargets[0] ),
+                                               p4: data.ShortName( data.armBaitTargets[1] ) } )
+                }
+            }
+        },
     },]
 });
 
