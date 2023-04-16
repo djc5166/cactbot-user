@@ -395,7 +395,6 @@ Options.Triggers.push(
             } );
 
             var count = 0;
-            data.armBaitTargets = [];
             hwArmBaitTargets.every( name => {
                 if (   ( data.trioDebuff[name] === undefined )
                     && ( data.dynamisStacks[name] >= 1 ) )
