@@ -409,10 +409,10 @@ Options.Triggers.push(
                 && ( data.armBaitTargets.length == 2 ) )
             {
                 return {
-                    infoText: response.call( { p1: data.ShortName( data.farJumpTargets[0] ),
-                                               p2: data.ShortName( data.farJumpTargets[1] ),
-                                               p3: data.ShortName( data.armBaitTargets[0] ),
-                                               p4: data.ShortName( data.armBaitTargets[1] ) } )
+                    infoText: output.response( { p1: data.ShortName( data.farJumpTargets[0] ),
+                                                 p2: data.ShortName( data.farJumpTargets[1] ),
+                                                 p3: data.ShortName( data.armBaitTargets[0] ),
+                                                 p4: data.ShortName( data.armBaitTargets[1] ) } )
                 }
             }
         },
