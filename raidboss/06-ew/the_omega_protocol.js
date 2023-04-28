@@ -12,7 +12,7 @@ const waveCannonR = [
     'name8'
 ];
 
-const sigmaBaitTargets = [
+const trioBaitTargets = [
     'name1',
     'name2',
     'name3',
