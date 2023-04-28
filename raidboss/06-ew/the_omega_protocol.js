@@ -77,8 +77,12 @@ Options.Triggers.push(
             rightGroup: { },
             leftGroup: { },
             dynamisStacks: { },
-            farWorldTargets: [],
-            armBaitTargets: []
+            sigmaFarWorldTargets: [],
+            sigmaArmBaitTargets: [],
+            omegaMonitorTargets: [],
+            omegaFarWorldTargets: [],
+            omegaFarWorldTargets2: [],
+            lineDebuffs: { }
         };
     },
     triggers: [
@@ -380,34 +384,133 @@ Options.Triggers.push(
             };
 
             var count = 0;
-            sigmaBaitTargets.every( name => {
+            trioBaitTargets.every( name => {
                 if (   ( data.trioDebuff[name] === undefined )
-                    && ( data.dynamisStacks[name] >= 1 ) )
+                    && ( data.dynamisStacks[name] === 1 ) )
                 {
-                    data.armBaitTargets.push( name );
+                    data.sigmaArmBaitTargets.push( name );
                     count++;
                 }
                 return (count < 2);
             } );
 
             var count = 0;
-            sigmaBaitTargets.slice().reverse().every( name => {
+            trioBaitTargets.slice().reverse().every( name => {
                 if ( data.trioDebuff[name] === undefined )
                 {
-                    data.farWorldTargets.push( name );
+                    data.sigmaFarWorldTargets.push( name );
                     count++;
                 }
                 return (count < 2);
             } );
 
-            if (   ( data.farWorldTargets.length == 2 )
-                && ( data.armBaitTargets.length == 2 ) )
+            if (   ( data.sigmaFarWorldTargets.length === 2 )
+                && ( data.sigmaArmBaitTargets.length === 2 ) )
             {
                 return {
-                    infoText: output.response( { p1: data.ShortName( data.farWorldTargets[0] ),
-                                                 p2: data.ShortName( data.farWorldTargets[1] ),
-                                                 p3: data.ShortName( data.armBaitTargets[0] ),
-                                                 p4: data.ShortName( data.armBaitTargets[1] ) } )
+                    infoText: output.response( { p1: data.ShortName( data.sigmaFarWorldTargets[0] ),
+                                                 p2: data.ShortName( data.sigmaFarWorldTargets[1] ),
+                                                 p3: data.ShortName( data.sigmaArmBaitTargets[0] ),
+                                                 p4: data.ShortName( data.sigmaArmBaitTargets[1] ) } )
+                }
+            }
+        },
+    },
+    {
+        id: 'MY TOP P5 Omega Debuffs',
+        // First In Line: ~32s duration, ~12s left after 2nd dodge
+        // Second In Line: ~50s duration, ~15s left after final bounce
+        type: 'GainsEffect',
+        netRegex: { effectId: ['D72', 'D73'] },
+        condition: (data, matches) => data.phase === 'omega',
+        delaySeconds: 25,
+        response: (data, matches, output) => {
+            output.responseOutputStrings = {
+                response: {
+                    en: '${p1} 1, ${p2} 2, ${p3} ${p4} monitors',
+                },
+            };
+
+            data.lineDebuffs[matches.target] = (parseFloat(matches.duration) > 40) ? 'second' : 'first';
+            if ( Object.keys(data.lineDebuffs).length < 4 )
+                return;
+
+            var count = 0;
+            trioBaitTargets.every( name => {
+                if (   ( data.lineDebuffs[name] === 'second' )
+                    && ( data.dynamisStacks[name] === 2 ) )
+                {
+                    data.omegaMonitorTargets.push( name );
+                    count++;
+                }
+                return (count < 2);
+            } );
+
+            if ( count < 2 )
+            {
+                trioBaitTargets.every( name => {
+                    if (   ( data.lineDebuffs[name] === undefined )
+                        && ( data.dynamisStacks[name] === 2 ) )
+                    {
+                        data.omegaMonitorTargets.push( name );
+                        count++;
+                    }
+                    return (count < 2);
+                } );
+            }
+
+            var count = 0;
+            trioBaitTargets.slice().reverse().every( name => {
+                if (   ( data.lineDebuffs[name] !== 'first' )
+                    && ( data.dynamisStacks[name] === 1 ) )
+                {
+                    data.omegaFarWorldTargets.push( name );
+                    count++;
+                }
+                return (count < 2);
+            } );
+
+            if (   ( data.omegaFarWorldTargets.length === 2 )
+                && ( data.omegaMonitorTargets.length === 2 ) )
+            {
+                return {
+                    infoText: output.response( { p1: data.ShortName( data.omegaFarWorldTargets[0] ),
+                                                 p2: data.ShortName( data.omegaFarWorldTargets[1] ),
+                                                 p3: data.ShortName( data.omegaMonitorTargets[0] ),
+                                                 p4: data.ShortName( data.omegaMonitorTargets[1] ) } )
+                }
+            }
+        },
+    },
+    {
+        id: 'MY TOP P5 Omega Tethers',
+        type: 'Ability',
+        netRegex: { id: '7B96', source: 'Omega', capture: false },
+        condition: (data, _matches) => data.phase === 'omega',
+        delaySeconds: 3,
+        response: (data, _matches, output) => {
+            output.responseOutputStrings = {
+                response: {
+                    en: '${p1} 1, ${p2} 2',
+                },
+            };
+
+            var count = 0;
+            trioBaitTargets.slice().reverse().every( name => {
+                if (   ( data.lineDebuffs[name] === undefined )
+                    && ( data.dynamisStacks[name] == 2 ) )
+                {
+                    data.omegaFarWorldTargets2.push( name );
+                    count++;
+                }
+                return (count < 2);
+            } );
+
+            if ( data.omegaFarWorldTargets2.length === 2 )
+            {
+                return {
+                    infoText: output.response( { p1: data.ShortName( data.omegaFarWorldTargets2[0] ),
+                                                 p2: data.ShortName( data.omegaFarWorldTargets2[1] ) } )
                 }
             }
         },
