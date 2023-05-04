@@ -423,7 +423,7 @@ Options.Triggers.push(
         type: 'GainsEffect',
         netRegex: { effectId: ['D72', 'D73'] },
         condition: (data, matches) => data.phase === 'omega',
-        delaySeconds: 25,
+        delaySeconds: 24,
         response: (data, matches, output) => {
             output.responseOutputStrings = {
                 response: {
@@ -485,7 +485,7 @@ Options.Triggers.push(
     {
         id: 'MY TOP P5 Omega Tethers',
         type: 'Ability',
-        netRegex: { id: '7B96', source: 'Omega', capture: false },
+        netRegex: { id: ['7B96', '7B97'], source: 'Omega', capture: false },
         condition: (data, _matches) => data.phase === 'omega',
         delaySeconds: 3,
         response: (data, _matches, output) => {
