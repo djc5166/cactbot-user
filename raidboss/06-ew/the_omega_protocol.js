@@ -82,7 +82,8 @@ Options.Triggers.push(
             omegaMonitorTargets: [],
             omegaFarWorldTargets: [],
             omegaFarWorldTargets2: [],
-            lineDebuffs: { }
+            lineDebuffs: { },
+            omegaWorldDebuffs: { },
         };
     },
     triggers: [
@@ -422,7 +423,7 @@ Options.Triggers.push(
         // Second In Line: ~50s duration, ~15s left after final bounce
         type: 'GainsEffect',
         netRegex: { effectId: ['D72', 'D73'] },
-        condition: (data, matches) => data.phase === 'omega',
+        condition: (data, _matches) => data.phase === 'omega',
         delaySeconds: 24,
         response: (data, matches, output) => {
             output.responseOutputStrings = {
@@ -432,6 +433,7 @@ Options.Triggers.push(
             };
 
             data.lineDebuffs[matches.target] = (parseFloat(matches.duration) > 40) ? 'second' : 'first';
+            data.omegaWorldDebuffs[matches.target] = (matches.effectId === 'D72' ? 'near' : 'far');
             if ( Object.keys(data.lineDebuffs).length < 4 )
                 return;
 
