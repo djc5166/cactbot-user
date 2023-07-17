@@ -63,6 +63,7 @@ function getHeadmarkerId( data, matches )
 
 Options.Triggers.push(
 {
+    id: 'TheOmegaProtocolUltimate-USER',
     zoneId: ZoneId.TheOmegaProtocolUltimate,
     initData: () => {
         return {

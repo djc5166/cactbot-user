@@ -14,6 +14,7 @@ const act4PurpleOutputStrings =
 
 Options.Triggers.push(
     {
+        id: 'AsphodelosTheFourthCircleSavage-USER',
         zoneId: ZoneId.AsphodelosTheFourthCircleSavage,
         triggers: [
         {

@@ -29,6 +29,7 @@ const enumStrings =
 
 Options.Triggers.push(
 {
+    id: 'DragonsongsRepriseUltimate-USER',
     zoneId: ZoneId.DragonsongsRepriseUltimate,
     timelineTriggers: [
     {

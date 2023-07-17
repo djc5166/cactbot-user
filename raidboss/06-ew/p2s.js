@@ -5,6 +5,7 @@ const harmaMarkers = [
 
 Options.Triggers.push(
     {
+        id: 'AsphodelosTheSecondCircleSavage-USER',
         zoneId: ZoneId.AsphodelosTheSecondCircleSavage,
         triggers: [
         {
